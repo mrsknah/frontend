@@ -1,99 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profile | SnapLoop</title>
-  <link rel="stylesheet" href="assets/css/login.css" />
-  <link rel="stylesheet" href="assets/css/home.css" />
-  <link rel="stylesheet" href="assets/css/profile.css" />
+  <meta charset="UTF-8">
+  <title>Profil Saya | SnapLoop</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="form-container">
+    <img src="assets/images/logo.png" alt="SnapLoop Logo" class="logo" />
+    <h2>My Profile</h2><br>
 
-  <!-- Header -->
-  <header class="nav-header">
-    <div class="nav-left">
-      <img src="assets/images/logo.png" alt="SnapLoop Logo" class="nav-logo" />
-    </div>
-
-    <div class="nav-center">
-      <input type="text" class="search-input" placeholder="Search on SnapLoop...">
-    </div>
-
-    <div class="nav-right">
-      <a href="home.html" class="nav-icon">🏠</a>
-      <a href="notifications.html" class="nav-icon">🔔</a>
-      <a href="profile.html" class="nav-icon">👤</a>
-    </div>
-  </header>
-
-  <!-- Profile Section -->
-  <main class="profile-content">
-    <section class="profile-header">
-      <div class="profile-avatar">
-        <img src="assets/images/profile-avatar.jpeg" alt="User Avatar" class="avatar" />
-      </div>
-      <div class="profile-info">
-        <h2>ulid</h2>
-        <p1>@xo.ulid</p1>
-        <p>📸 Capturing light & quiet moments | ☕ + 🌿 lover</p>
-        <button id="edit-profile-btn" class="edit-btn">Edit Profile</button>
-      </div>
-    </section>
-
-    <section class="profile-stats">
-      <div class="stat-item">
-        <span class="stat-number">0</span>
-        <span class="stat-label">Posts</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">500</span>
-        <span class="stat-label">Followers</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">500</span>
-        <span class="stat-label">Following</span>
-      </div>
-    </section>
-
-    <section class="profile-posts">
-      <h3>Your Posts</h3>
-
-      <div class="no-posts">
-        <p>You haven’t posted anything yet.</p>
-        <label for="upload-post" class="upload-icon" title="Upload your first post">
-          📤
-        </label>
-        <input type="file" id="upload-post" style="display: none;" />
-
-        <div id="caption-section" style="display: none;">
-          <textarea id="caption-input" placeholder="Write a caption..." rows="3"></textarea>
-          <button id="post-button">Post</button>
-        </div>
-      </div>
-
-      <div class="posts-grid" style="display: none;"></div>
-    </section>
-  </main>
-
-  <!-- Modal Edit Profile -->
-  <div id="edit-profile-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <h3>Edit Profile</h3>
-      <input type="text" id="edit-fullname" placeholder="Full Name" />
-      <textarea id="edit-bio" placeholder="Bio"></textarea>
-      <input type="file" id="edit-photo" accept="image/*" />
-      <div class="modal-actions">
-        <button id="save-profile-btn">Save</button>
-        <button id="cancel-edit-btn">Cancel</button>
+    <div id="userProfile" class="profile-header">
+      <img src="assets/images/no-profile.jpg" alt="Foto Profil" id="profilePic">
+      <div>
+        <h3 id="profileUsername">@username</h3>
+        <p>Role: <span id="profileRole"></span></p>
       </div>
     </div>
+
+    <h3>Foto Saya</h3>
+    <div id="photoGallery" class="user-gallery"></div>
+
+    <br>
+    <a href="upload.html" class="yellow-btn">Upload Foto Baru</a>
+    <br><br>
+    <button id="logoutBtn">Logout</button>
   </div>
 
-  <footer class="footer">
-    <p>&copy; 2025 SnapLoop. All rights reserved.</p>
-  </footer>
+  <script>
+    //const token = localStorage.getItem("token");
+    //if (!token) window.location.href = "index.html";
 
-  <script src="profile.js"></script>
+    fetch("http://localhost:5000/users/me", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(user => {
+      // Update info profil
+      document.getElementById("profileUsername").textContent = `@${user.username}`;
+      document.getElementById("profileRole").textContent = user.role;
+
+      // Kalau suatu saat user punya avatar, bisa update logic ini
+      if (user.profilePhotoUrl) {
+        document.getElementById("profilePic").src = `http://localhost:5000/${user.profilePhotoUrl}`;
+      }
+
+      // Ambil foto user
+      fetch(`http://localhost:5000/photos/${user.id}`)
+        .then(res => res.json())
+        .then(photos => {
+          const gallery = document.getElementById("photoGallery");
+          if (photos.length === 0) {
+            gallery.innerHTML = "<p>Belum ada foto.</p>";
+          } else {
+            photos.forEach(photo => {
+              const img = document.createElement("img");
+              img.src = `http://localhost:5000/${photo.url}`;
+              img.style.width = "150px";
+              img.style.margin = "10px";
+              img.style.borderRadius = "8px";
+              gallery.appendChild(img);
+            });
+          }
+        });
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      window.location.href = "index.html";
+    });
+  </script>
 </body>
 </html>

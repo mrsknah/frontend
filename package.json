@@ -1,0 +1,12 @@
+{
+  "name": "frontend-photo-app",
+  "version": "1.0.0",
+  "description": "Frontend untuk photo app Express + MySQL",
+  "main": "index.html",
+  "scripts": {
+    "serve": "live-server --port=3000 --open=index.html"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

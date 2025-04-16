@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Semua Pengguna | SnapLoop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Profil Publik Pengguna</h2>
+
+    <div id="userList"></div>
+
+    <br>
+    <a href="index.html" class="back-link">Kembali ke Login</a>
+  </div>
+
+  <script>
+    // Ambil semua user
+    fetch("http://localhost:5000/users", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("Gagal ambil data user");
+      }
+      return res.json();
+    })
+    .then(users => {
+      const container = document.getElementById("userList");
+      users.forEach(user => {
+        const userSection = document.createElement("div");
+        userSection.classList.add("user-section");
+        userSection.innerHTML = `
+          <h3>${user.username} (${user.role})</h3>
+          <div id="photos-${user.id}" class="user-gallery"></div>
+        `;
+        container.appendChild(userSection);
+
+        // Ambil foto untuk user ini
+        fetch(`http://localhost:5000/photos/${user.id}`)
+          .then(res => res.json())
+          .then(photos => {
+            const gallery = document.getElementById(`photos-${user.id}`);
+            if (photos.length === 0) {
+              gallery.innerHTML = "<p>Tidak ada foto.</p>";
+            } else {
+              photos.forEach(photo => {
+                const img = document.createElement("img");
+                img.src = `http://localhost:5000/${photo.url}`;
+                img.style.width = "150px";
+                img.style.margin = "10px";
+                gallery.appendChild(img);
+              });
+            }
+          });
+      });
+    })
+    .catch(err => {
+      document.getElementById("userList").innerHTML = `<p>${err.message}</p>`;
+    });
+  </script>
+</body>
+</html>
